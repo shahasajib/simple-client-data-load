@@ -1,23 +1,66 @@
-import logo from './logo.svg';
 import './App.css';
+import { useEffect, useRef, useState } from 'react';
+
 
 function App() {
+  const [users, setUsers] = useState([]);
+  const nameRef = useRef();
+  const emailRef = useRef();
+  useEffect(() => {
+    fetch("http://localhost:5000/users")
+      .then(res => res.json())
+      .then(data => setUsers(data))
+  })
+  const handleSearchData = e => {
+    const name = nameRef.current.value;
+    const email = emailRef.current.value;
+
+    const newUser = { name: name, email: email }
+
+
+    // send to the server data
+    fetch("http://localhost:5000/users", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newUser)
+    })
+      .then(res => res.json())
+      .then(data => {
+        const addData = data;
+        const newUsers = [...users, addData]
+        setUsers(newUsers)
+      })
+
+
+
+    e.preventDefault()
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h2>found:{users.length}</h2>
+      <form onSubmit={handleSearchData}>
+        <input type="text" ref={nameRef} name="" id="" placeholder="Search" />
+        <input type="email" ref={emailRef} name="" id="" placeholder="Email" />
+        <input type="submit" value="submit" />
+      </form>
+      <ul>
+        {
+          users.map(user => <li
+            key={user.id}>
+            Name:{user.name}
+            <br />
+            E-mail:{user.email}
+            <br />
+            Mobile-Number:{user.mobile}
+
+          </li>
+
+
+          )
+        }
+      </ul>
     </div>
   );
 }
